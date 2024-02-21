@@ -34,6 +34,7 @@ public class AccountServiceImpl implements AccountService {
                 .accountType(request.getAccountType())
                 .availableBalance(BigDecimal.ZERO)
                 .ledgerBalance(BigDecimal.ZERO)
+                .isDeleted(false)
                 .build();
 
             account = accountRepository.save(account);
@@ -74,7 +75,7 @@ public class AccountServiceImpl implements AccountService {
 
             accountRepository.delete(account.get());
 
-            return new ApiResponse<>().success(account, "Account updated successfully");
+            return new ApiResponse<>().success(null, "Account updated successfully");
         } catch (Exception e) {
             return new ApiResponse<>().failure("An error occurred when updating account: " + e.getMessage());
         }

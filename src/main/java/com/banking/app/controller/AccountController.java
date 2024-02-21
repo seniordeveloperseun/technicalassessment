@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,8 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.banking.app.model.dto.CreateAccountDto;
 import com.banking.app.model.dto.UpdateAccountDto;
 import com.banking.app.service.AccountService;
-
-import jakarta.websocket.server.PathParam;
 
 @RestController
 @RequestMapping("api/v1/account")
@@ -50,8 +49,8 @@ public class AccountController {
         }
     }
 
-    @GetMapping(path = "/:id")
-    public ResponseEntity<Object> getById(@PathParam(value = "id") Long accountId) {
+    @GetMapping(path = "/{id}")
+    public ResponseEntity<Object> getById(@PathVariable(value = "id") Long accountId) {
         try {
             var resp = accountService.getById(accountId);
             return new ResponseEntity<>(resp, HttpStatus.OK);
@@ -61,8 +60,8 @@ public class AccountController {
         }
     }
 
-    @PatchMapping(path = "/:id")
-    public ResponseEntity<Object> update(@PathParam(value = "id") Long accountId, @RequestBody UpdateAccountDto accountDto) {
+    @PatchMapping(path = "/{id}")
+    public ResponseEntity<Object> update(@PathVariable(value = "id") Long accountId, @RequestBody UpdateAccountDto accountDto) {
         try {
             var resp = accountService.update(accountId, accountDto);
             return new ResponseEntity<>(resp, HttpStatus.OK);
@@ -72,8 +71,8 @@ public class AccountController {
         }
     }
 
-    @DeleteMapping(path = "/:id")
-    public ResponseEntity<Object> delete(@PathParam(value = "id") Long accountId) {
+    @DeleteMapping(path = "/{id}")
+    public ResponseEntity<Object> delete(@PathVariable(value = "id") Long accountId) {
         try {
             var resp = accountService.delete(accountId);
             return new ResponseEntity<>(resp, HttpStatus.OK);

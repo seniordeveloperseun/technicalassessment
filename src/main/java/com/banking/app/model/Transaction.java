@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "transaction")
-@SQLDelete(sql = "UPDATE transaction SET is_deleted TRUE WHERE id = ?")
+@SQLDelete(sql = "UPDATE transaction SET is_deleted = TRUE WHERE id = ?")
 @Where(clause = "is_deleted = FALSE")
 @Builder
 @Data

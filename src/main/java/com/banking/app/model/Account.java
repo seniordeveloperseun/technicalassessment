@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "account")
-@SQLDelete(sql = "UPDATE account SET is_deleted TRUE WHERE id = ?")
+@SQLDelete(sql = "UPDATE account SET is_deleted = TRUE WHERE id = ?")
 @Where(clause = "is_deleted = FALSE")
 @Builder
 @Data
@@ -46,7 +46,7 @@ public class Account {
     @Column(name = "account_number", nullable = false)
     private String accountNumber;
 
-    @Column(name = "bvn", nullable = false, unique = true)
+    @Column(name = "bvn", nullable = false)
     private String bvn;
 
     @Enumerated(EnumType.STRING)
