@@ -47,16 +47,16 @@ public class Transaction {
     @Column(name = "payment_reference", nullable = false)
     private String paymentReference;
 
-    @Column(name = "debit_account_number", nullable = false)
+    @Column(name = "debit_account_number", nullable = true)
     private String debitAccountNumber;
 
-    @Column(name = "debit_account_name", nullable = false)
+    @Column(name = "debit_account_name", nullable = true)
     private String debitAccountName;
 
-    @Column(name = "credit_account_number", nullable = false)
+    @Column(name = "credit_account_number", nullable = true)
     private String creditAccountNumber;
 
-    @Column(name = "credit_account_name", nullable = false)
+    @Column(name = "credit_account_name", nullable = true)
     private String creditAccountName;
 
     @Enumerated(EnumType.STRING)

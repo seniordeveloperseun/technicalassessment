@@ -8,20 +8,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.banking.app.model.Account;
+import com.banking.app.model.Transaction;
+import com.banking.app.model.Transaction.TransactionStatus;
+import com.banking.app.model.Transaction.TransactionType;
 import com.banking.app.model.dto.ApiResponse;
 import com.banking.app.model.dto.CreateAccountDto;
+import com.banking.app.model.dto.FundDto;
 import com.banking.app.model.dto.UpdateAccountDto;
 import com.banking.app.repository.AccountRepository;
+import com.banking.app.repository.TransactionRepository;
 import com.banking.app.service.AccountService;
 
 @Service
 public class AccountServiceImpl implements AccountService {
 
     private final AccountRepository accountRepository;
+    private final TransactionRepository transactionRepository;
 
     @Autowired
-    public AccountServiceImpl(AccountRepository accountRepository) {
+    public AccountServiceImpl(AccountRepository accountRepository, TransactionRepository transactionRepository) {
         this.accountRepository = accountRepository;
+        this.transactionRepository = transactionRepository;
     }
 
     @Override
@@ -108,6 +115,87 @@ public class AccountServiceImpl implements AccountService {
             return new ApiResponse<List<Account>>().success(accounts, "Accounts fetched successfully");
         } catch (Exception e) {
             return new ApiResponse<List<Account>>().failure("An error occurred when fetching account: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public ApiResponse<Transaction> makeWithdrawal(Long accountId, FundDto withdawDto) {
+        try {
+            var account = accountRepository.findById(accountId);
+            if (!account.isPresent()) {
+                return new ApiResponse<Transaction>().failure("Account not found");
+            }
+            // call Core Banking Application to withdraw, then update the balance
+
+            account.get().setAvailableBalance(account.get().getAvailableBalance().subtract(withdawDto.getAmount()));
+            accountRepository.save(account.get());
+
+            var transaction = Transaction.builder()
+            .amount(withdawDto.getAmount())
+            .debitAccountNumber(account.get().getAccountNumber())
+            .debitAccountName(account.get().getAccountName())
+            .paymentReference("REF" + generateAccountNumber())
+            .type(TransactionType.DEBIT)
+            .status(TransactionStatus.SUCCESS)
+            .isDeleted(false)
+            .build();
+
+            transaction = transactionRepository.save(transaction);
+
+            return new ApiResponse<Transaction>().success(null, "Withdrawal successful");
+        } catch (Exception e) {
+            return new ApiResponse<Transaction>().failure("An error occurred when withdrawing from account: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public ApiResponse<Transaction> makeDeposit(Long accountId, FundDto fundDto) {
+        try {
+            var account = accountRepository.findById(accountId);
+            if (!account.isPresent()) {
+                return new ApiResponse<Transaction>().failure("Account not found");
+            }
+            // call Core Banking Application to make deposit, then update the balance
+
+            account.get().setAvailableBalance(account.get().getAvailableBalance().add(fundDto.getAmount()));
+            accountRepository.save(account.get());
+
+            var transaction = Transaction.builder()
+                .amount(fundDto.getAmount())
+                .creditAccountNumber(account.get().getAccountNumber())
+                .creditAccountName(account.get().getAccountName())
+                .paymentReference("REF" + generateAccountNumber())
+                .type(TransactionType.CREDIT)
+                .status(TransactionStatus.SUCCESS)
+                .isDeleted(false)
+                .build();
+
+            transaction = transactionRepository.save(transaction);
+
+            return new ApiResponse<Transaction>().success(transaction, "Funding successful");
+        } catch (Exception e) {
+            return new ApiResponse<Transaction>().failure("An error occurred when funding account: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public ApiResponse<List<Transaction>> getAccountTransactions(Long accountId) {
+        try {
+
+            var account = accountRepository.findById(accountId);
+            if (!account.isPresent()) {
+                return new ApiResponse<List<Transaction>>().failure("Account not found");
+            }
+
+            var transactions = transactionRepository.findAllByDebitAccountNumber(account.get().getAccountNumber());
+
+            if (transactions.isEmpty()) {
+                return new ApiResponse<List<Transaction>>().failure("No transactions found");
+            }
+
+            return new ApiResponse<List<Transaction>>().success(transactions, "Transactions fetched successfully");
+        } catch (Exception e) {
+            return new ApiResponse<List<Transaction>>().failure("An error occurred when fetching account transactions: " + e.getMessage());
         }
     }
 
