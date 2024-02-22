@@ -172,7 +172,7 @@ public class AccountServiceImpl implements AccountService {
 
             transaction = transactionRepository.save(transaction);
 
-            return new ApiResponse<Transaction>().success(transaction, "Funding successful");
+            return new ApiResponse<Transaction>().success(transaction, "deposit successful");
         } catch (Exception e) {
             return new ApiResponse<Transaction>().failure("An error occurred when funding account: " + e.getMessage());
         }
@@ -187,7 +187,7 @@ public class AccountServiceImpl implements AccountService {
                 return new ApiResponse<List<Transaction>>().failure("Account not found");
             }
 
-            var transactions = transactionRepository.findAllByDebitAccountNumber(account.get().getAccountNumber());
+            var transactions = transactionRepository.findAllByAccountNumber(account.get().getAccountNumber());
 
             if (transactions.isEmpty()) {
                 return new ApiResponse<List<Transaction>>().failure("No transactions found");
